@@ -6,7 +6,7 @@
 
 .slide-track {
     display: flex;
-    width: calc(250px * 16);
+    width: calc(260px * 16);
     animation: scroll 30s linear infinite;
 }
 
@@ -16,6 +16,12 @@
     object-fit: cover;
     margin-right: 10px;
     border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* Pause slider when mouse is over it */
+.slide-track:hover {
+    animation-play-state: paused;
 }
 
 @keyframes scroll {
@@ -26,6 +32,10 @@
     100% {
         transform: translateX(0);
     }
+}
+
+.slide-track img:hover {
+    transform: scale(1.05);
 }
 
 
