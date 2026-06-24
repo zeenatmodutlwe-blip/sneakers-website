@@ -131,3 +131,27 @@ main a[href^="mailto:"]{
    padding:0;
 }
 
+.footer-container {
+    display: flex;
+    justify-content: space-around; 
+    align-items: flex-start;
+    text-align: center;
+   width: 100%;
+}
+
+.footer-section {
+    width: 100%;
+    min-width: 200px;
+    margin-bottom: 2px;
+}
+
+.footer-section h3 {
+    margin-bottom: 2px;
+    color: orange;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 0px;
+}
+
