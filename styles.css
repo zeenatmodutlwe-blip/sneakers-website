@@ -1,10 +1,31 @@
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-12px); }
+.image-slider {
+    overflow: hidden;
+    width: 100%;
+    padding: 20px 0;
 }
 
-pic {
-  animation: float 3s ease-in-out infinite;
+.slide-track {
+    display: flex;
+    width: calc(250px * 16);
+    animation: scroll 30s linear infinite;
+}
+
+.slide-track img {
+    width: 250px;
+    height: 180px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 10px;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 
