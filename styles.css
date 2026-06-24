@@ -163,7 +163,7 @@ main a[href^="mailto:"]{
 
 .footer-section {
     width: 100%;
-    min-width: 200px;
+    min-width: 100px;
     margin-bottom: 2px;
 }
 
