@@ -137,37 +137,38 @@ main a[href^="mailto:"]{
 }
 
 /* menu */
-.buttons{
-    text-align:center;
-    margin:0;
-}
-
-.buttons button{
+.brand-menu{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    list-style:none;
     padding:0;
-    margin:0;
-    
-    background:white;
-    color:white;
+    margin:30px 0;
+}
+
+.brand-menu li{
     cursor:pointer;
-   
+    font-size:20px;
+    font-weight:bold;
+    transition:0.3s;
 }
 
-.buttons button:hover{
-    background:orange;
+.brand-menu li:hover{
+    color:red;
 }
 
-.sneaker-gallery{
-    display:grid;
-    
+.brand-content{
+    display:none;
+    justify-content:center;
+    gap:20px;
     flex-wrap:wrap;
-    gap:5px;
 }
 
-.sneaker-gallery img{
-    width:150px;
+.brand-content img{
+    width:250px;
     height:250px;
     object-fit:cover;
-    
+    border-radius:10px;
 }
 
 
