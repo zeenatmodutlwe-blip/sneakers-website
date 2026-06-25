@@ -55,6 +55,62 @@
 
 </div>
 
+           
+
+<div class="sneaker-card active" id="air-glide">
+    <div class="card-visual">
+        <img src="images/puma-suede-xl.png" alt="Puma Suede XL" class="shoe-image">
+    </div>
+
+    <div class="card-info">
+        <span class="card-tag">Lifestyle</span>
+
+        <h2 class="card-name">Puma Suede XL</h2>
+
+        <p class="card-desc">
+            Premium suede upper with a classic streetwear look.
+        </p>
+
+        <div class="color-row">
+            <span class="color-label">Colour</span>
+            <div class="swatch active"></div>
+            <div class="swatch"></div>
+            <div class="swatch"></div>
+        </div>
+
+        <div class="size-row">
+            <button class="size-btn">6</button>
+            <button class="size-btn">7</button>
+            <button class="size-btn">8</button>
+            <button class="size-btn">9</button>
+        </div>
+
+        <div class="card-price">P1,299</div>
+
+        <button class="add-btn">Add to Cart</button>
+    </div>
+</div>
+
+<script src="script.js">
+
+
+function show(id, tab) {
+    document.querySelectorAll('.sneaker-card')
+        .forEach(card => card.classList.remove('active'));
+
+    document.getElementById(id)
+        .classList.add('active');
+
+    document.querySelectorAll('.tab')
+        .forEach(t => t.classList.remove('active'));
+
+    tab.classList.add('active');
+}
+</script>
+
+
+            
+
           </main>
           <footer>
            <p>&copy;2026 Vars Kicks</p>
