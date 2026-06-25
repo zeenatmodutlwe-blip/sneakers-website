@@ -4,30 +4,6 @@
     object-fit:contain;
 }
 
-.card-price{
-    font-size:24px;
-    font-weight:600;
-}
-
-.size-btn{
-    padding:8px 15px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.add-btn{
-    background:black;
-    color:white;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-}
-
-
-
-
-
-
 
 
 .image-slider {
