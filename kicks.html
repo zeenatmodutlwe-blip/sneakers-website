@@ -131,7 +131,489 @@ function showBrand(brand){
 // Show Nike by default when page loads
 showBrand('adidas');
 </script>  
-  
+
+
+
+
+
+
+
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f6f3;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: rgba(0,0,0,0.1);
+      --accent: #1a1a1a;
+      --radius: 20px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 3rem 2rem 1.5rem;
+    }
+    header h1 {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 0 2rem 2.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab {
+      position: relative;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      white-space: nowrap;
+      transition: color 0.25s;
+      outline: none;
+    }
+    .tab::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%; right: 50%;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: left 0.3s ease, right 0.3s ease;
+    }
+    .tab.active { color: var(--text); font-weight: 500; }
+    .tab.active::after { left: 16px; right: 16px; }
+    .tab:hover { color: var(--text); }
+
+    .display {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    .sneaker-card {
+      display: none;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 0.5px solid var(--border);
+    }
+    .sneaker-card.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      animation: fadeSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card-visual {
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 60% 40%, var(--glow, #e8e4dc) 0%, transparent 70%);
+      opacity: 0.8;
+    }
+    .shoe-emoji {
+      font-size: 120px;
+      position: relative;
+      z-index: 1;
+      animation: floatShoe 4s ease-in-out infinite;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.12));
+      user-select: none;
+    }
+
+    .card-info {
+      padding: 2.5rem 2rem 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .card-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .card-name {
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .card-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .card-price { font-size: 24px; font-weight: 500; }
+    .card-price .old {
+      font-size: 15px;
+      color: var(--muted);
+      text-decoration: line-through;
+      margin-right: 6px;
+      font-weight: 400;
+    }
+
+    .color-row { display: flex; align-items: center; gap: 10px; }
+    .color-label { font-size: 12px; color: var(--muted); }
+    .swatch {
+      width: 18px; height: 18px; border-radius: 50%;
+      cursor: pointer; border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .swatch:hover { transform: scale(1.2); }
+    .swatch.active { border-color: var(--text); }
+
+    .size-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .size-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 0.5px solid var(--border);
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      color: var(--text);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .size-btn:hover, .size-btn.active {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--text);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .add-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+    .add-btn:active { transform: scale(0.98); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .badge-new  { background: #E6F1FB; color: #0C447C; }
+    .badge-hot  { background: #FAECE7; color: #993C1D; }
+    .badge-sale { background: #EAF3DE; color: #3B6D11; }
+    .badge-ltd  { background: #F3ECF9; color: #6B3A9E; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floatShoe {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50%       { transform: translateY(-14px) rotate(-5deg); }
+    }
+
+    @media (max-width: 600px) {
+      .sneaker-card.active { grid-template-columns: 1fr; }
+      .card-visual { padding: 2rem; }
+      .shoe-emoji { font-size: 90px; }
+      .card-info { padding: 1.5rem; }
+      .card-name { font-size: 22px; }
+    }
+
+.shoe-image {
+    width: 250px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+    
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Vars Kicks — Pick your pair</h1>
+</header>
+
+<nav class="tab-nav" role="tablist">
+  <button class="tab active" role="tab" onclick="show('air-glide', this)">Puma Suede xl</button>
+  <button class="tab" role="tab" onclick="show('trail-raven', this)">Adidas Campus</button>
+  <button class="tab" role="tab" onclick="show('velvet-edge', this)">Nike Dunk</button>
+  <button class="tab" role="tab" onclick="show('drift-slide', this)">Airforce</button>
+  <button class="tab" role="tab" onclick="show('cloud-run', this)">Nike Tn</button>
+  <button class="tab" role="tab" onclick="show('urban-force', this)">Nike Portal</button>
+</nav>
+
+<div class="display">
+
+  <!-- Puma Suede xl -->
+  <div class="sneaker-card active" id="air-glide" style="--glow:#dce8f5">
+     
+    <div class="card-visual"><span class="shoe-image"><img src="images/brown dunk.png" alt="Air Glide Sneaker"></span></div>
+    <div class="card-info">
+      <span class="card-tag">Running · Lightweight</span>
+      <div>
+        <span class="badge badge-new">New arrival</span>
+        <h2 class="card-name" style="margin-top:8px">Air Glide Pro</h2>
+      </div>
+      <p class="card-desc">Ultra-responsive foam cushioning with a breathable knit upper. Built for daily training runs and long-distance comfort.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#378ADD" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#E24B4A" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#888780" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#1a1a1a" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">6</button>
+          <button class="size-btn" onclick="selectSize(this)">7</button>
+          <button class="size-btn active" onclick="selectSize(this)">8</button>
+          <button class="size-btn" onclick="selectSize(this)">9</button>
+          <button class="size-btn" onclick="selectSize(this)">10</button>
+          <button class="size-btn" onclick="selectSize(this)">11</button>
+        </div>
+      </div>
+      <div class="card-price">$139</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+  <!-- Trail Raven X -->
+  <div class="sneaker-card" id="trail-raven" style="--glow:#d8e8cc">
+    <div class="card-visual"><span class="shoe-emoji">🥾</span></div>
+    <div class="card-info">
+      <span class="card-tag">Trail · Waterproof</span>
+      <div>
+        <span class="badge badge-hot">Hot right now</span>
+        <h2 class="card-name" style="margin-top:8px">Trail Raven X</h2>
+      </div>
+      <p class="card-desc">Aggressive grip outsole with waterproof membrane. Tackles mud, rock, and root without hesitation.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#639922" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#BA7517" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#2C2C2A" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">6</button>
+          <button class="size-btn" onclick="selectSize(this)">7</button>
+          <button class="size-btn active" onclick="selectSize(this)">8</button>
+          <button class="size-btn" onclick="selectSize(this)">9</button>
+          <button class="size-btn" onclick="selectSize(this)">10</button>
+        </div>
+      </div>
+      <div class="card-price">$189</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+  <!-- Velvet Edge -->
+  <div class="sneaker-card" id="velvet-edge" style="--glow:#f5dce8">
+    <div class="card-visual"><span class="shoe-emoji">👠</span></div>
+    <div class="card-info">
+      <span class="card-tag">Lifestyle · Elevated</span>
+      <div>
+        <span class="badge badge-sale">On sale</span>
+        <h2 class="card-name" style="margin-top:8px">Velvet Edge</h2>
+      </div>
+      <p class="card-desc">Suede upper with contrast sole. The shoe that goes from gallery opening to dinner without missing a beat.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#D4537E" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#7F77DD" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#2C2C2A" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">5</button>
+          <button class="size-btn active" onclick="selectSize(this)">6</button>
+          <button class="size-btn" onclick="selectSize(this)">7</button>
+          <button class="size-btn" onclick="selectSize(this)">8</button>
+        </div>
+      </div>
+      <div class="card-price"><span class="old">$120</span>$89</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+  <!-- Drift Slide -->
+  <div class="sneaker-card" id="drift-slide" style="--glow:#cceee2">
+    <div class="card-visual"><span class="shoe-emoji">🩴</span></div>
+    <div class="card-info">
+      <span class="card-tag">Casual · Everyday</span>
+      <div>
+        <span class="badge badge-new">New arrival</span>
+        <h2 class="card-name" style="margin-top:8px">Drift Slide</h2>
+      </div>
+      <p class="card-desc">Cloud-soft EVA footbed with adjustable strap. Slip on and go — whether that's the beach or the back garden.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#1D9E75" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#E24B4A" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#888780" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#F5C842" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">6</button>
+          <button class="size-btn active" onclick="selectSize(this)">7</button>
+          <button class="size-btn" onclick="selectSize(this)">8</button>
+          <button class="size-btn" onclick="selectSize(this)">9</button>
+          <button class="size-btn" onclick="selectSize(this)">10</button>
+          <button class="size-btn" onclick="selectSize(this)">11</button>
+          <button class="size-btn" onclick="selectSize(this)">12</button>
+        </div>
+      </div>
+      <div class="card-price">$59</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+  <!-- Cloud Run 2 -->
+  <div class="sneaker-card" id="cloud-run" style="--glow:#e8e0f5">
+    <div class="card-visual"><span class="shoe-emoji">🫧</span></div>
+    <div class="card-info">
+      <span class="card-tag">Running · Max Cushion</span>
+      <div>
+        <span class="badge badge-ltd">Limited</span>
+        <h2 class="card-name" style="margin-top:8px">Cloud Run 2</h2>
+      </div>
+      <p class="card-desc">Our most cushioned runner yet. Dual-layer foam stack absorbs impact on roads and delivers energy return every step.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#9B7DD4" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#ffffff; border:1.5px solid #ccc" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#1a1a1a" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">7</button>
+          <button class="size-btn active" onclick="selectSize(this)">8</button>
+          <button class="size-btn" onclick="selectSize(this)">9</button>
+          <button class="size-btn" onclick="selectSize(this)">10</button>
+          <button class="size-btn" onclick="selectSize(this)">11</button>
+        </div>
+      </div>
+      <div class="card-price">$219</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+  <!-- Urban Force -->
+  <div class="sneaker-card" id="urban-force" style="--glow:#f0e8dc">
+    <div class="card-visual"><span class="shoe-emoji">👞</span></div>
+    <div class="card-info">
+      <span class="card-tag">Lifestyle · Streetwear</span>
+      <div>
+        <span class="badge badge-hot">Hot right now</span>
+        <h2 class="card-name" style="margin-top:8px">Urban Force</h2>
+      </div>
+      <p class="card-desc">Chunky sole, clean lines, premium leather upper. The streetwear staple that pairs with everything in your wardrobe.</p>
+      <div class="color-row">
+        <span class="color-label">Colour</span>
+        <div class="swatch active" style="background:#C49A6C" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#1a1a1a" onclick="selectSwatch(this)"></div>
+        <div class="swatch" style="background:#ffffff; border:1.5px solid #ccc" onclick="selectSwatch(this)"></div>
+      </div>
+      <div>
+        <div class="color-label" style="margin-bottom:6px">Size (UK)</div>
+        <div class="size-row">
+          <button class="size-btn" onclick="selectSize(this)">6</button>
+          <button class="size-btn" onclick="selectSize(this)">7</button>
+          <button class="size-btn active" onclick="selectSize(this)">8</button>
+          <button class="size-btn" onclick="selectSize(this)">9</button>
+          <button class="size-btn" onclick="selectSize(this)">10</button>
+          <button class="size-btn" onclick="selectSize(this)">11</button>
+        </div>
+      </div>
+      <div class="card-price">$165</div>
+      <button class="add-btn">Add to bag</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function show(id, tab) {
+    document.querySelectorAll('.sneaker-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    tab.classList.add('active');
+  }
+
+  function selectSwatch(el) {
+    el.closest('.color-row').querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function selectSize(el) {
+    el.closest('.size-row').querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+              
 </main>
          
           <footer>
