@@ -45,52 +45,54 @@
             <main class="container-fluid px-0">
 
 
-              <section class="sneaker-menu">
+            <section class="brands">
 
-    <div class="buttons">
-       
-        <button onclick="showSneaker('dunk')">Nike Dunk |</button>
-        <button onclick="showSneaker('campus')">Adidas Campus |</button>
-        <button onclick="showSneaker('puma')">Puma Suede xl</button>
+    <ul class="brand-menu">
+        <li onclick="showBrand('nike')">Adidas Campus |</li>
+        <li onclick="showBrand('adidas')">Puma Suede xl |</li>
+        <li onclick="showBrand('puma')">Nike Dunk</li>
+    </ul>
+
+
+
+    <div id="adidas" class="brand-content">
+        <img src="images/adidas campus grey.jpg" alt="">
+        <img src="images/adidas campus.jpg" alt="">
+        <img src="images/campus.jpg" alt="">
     </div>
 
-   
-
-    <div id="dunk" class="sneaker-gallery">
-        <img src="images/blue dunk.jpg">
-        <img src="images/black dunk.jpg">
-        <img src="images/brown dunk.jpg">
+    <div id="puma" class="brand-content">
+        <img src="images/pumaxl.jpg" alt="">
+        <img src="images/red xl.jpg" alt="">
+        <img src="images/Puma XL blue.jpg" alt="">
     </div>
 
-    <div id="campus" class="sneaker-gallery">
-        <img src="images/download.jpg">
-        <img src="images/campus.jpg">
-        <img src="images/adidas campus.jpg">
-    </div>
-
-    <div id="puma" class="sneaker-gallery">
-        <img src="images/Puma XL blue.jpg">
-        <img src="images/pumaxl.jpg">
-        <img src="images/red xl.jpg">
+    <div id="nike" class="brand-content">
+        <img src="images/black dunk.jpg" alt="">
+        <img src="images/blue dunk.jpg" alt="">
+        <img src="images/brown dunk.jpg" alt="">
     </div>
 
 </section>
 
-              <script>
-function showSneaker(category){
 
-    let galleries = document.querySelectorAll('.sneaker-gallery');
+<script>
+function showBrand(brand){
 
-    galleries.forEach(gallery => {
-        gallery.style.display = 'none';
+    let contents = document.querySelectorAll('.brand-content');
+
+    contents.forEach(content => {
+        content.style.display = 'none';
     });
 
-    document.getElementById(category).style.display = 'flex';
+    document.getElementById(brand).style.display = 'flex';
 }
 
-
+// Show Nike by default when page loads
+showBrand('nike');
 </script>
 
+              
               
     <div class="row">
       <div class="col-12">
