@@ -43,6 +43,56 @@
          
 
             <main class="container-fluid px-0">
+
+
+              <section class="sneaker-menu">
+
+    <div class="buttons">
+       
+        <button onclick="showSneaker('dunk')">Nike Dunk</button>
+        <button onclick="showSneaker('campus')">Adidas Campus</button>
+        <button onclick="showSneaker('puma')">Puma Suede xl</button>
+    </div>
+
+   
+
+    <div id="dunk" class="sneaker-gallery">
+        <img src="images/blue dunk.jpg">
+        <img src="images/black dunk.jpg">
+        <img src="images/brown dunk.jpg">
+    </div>
+
+    <div id="campus" class="sneaker-gallery">
+        <img src="images/download.jpg">
+        <img src="images/campus.jpg">
+        <img src="images/adidas campus.jpg">
+    </div>
+
+    <div id="puma" class="sneaker-gallery">
+        <img src="images/Puma XL blue.jpg">
+        <img src="images/pumaxl.jpg">
+        <img src="images/red xl.jpg">
+    </div>
+
+</section>
+
+              <script>
+function showSneaker(category){
+
+    let galleries = document.querySelectorAll('.sneaker-gallery');
+
+    galleries.forEach(gallery => {
+        gallery.style.display = 'none';
+    });
+
+    document.getElementById(category).style.display = 'flex';
+}
+
+// Show Nike TN when page loads
+showSneaker('puma');
+</script>
+
+              
     <div class="row">
       <div class="col-12">
        <div class="panel"> 
