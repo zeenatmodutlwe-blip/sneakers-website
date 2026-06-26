@@ -40,88 +40,10 @@
       </div>
     </nav>
         </header>
-         
-
-            <main class="container-fluid px-0">
 
 
-            <section class="brands">
+<main>
 
-    <ul class="brand-menu">
-        <li onclick="showBrand('nike')">Nike Dunk | </li>
-        <li onclick="showBrand('adidas')">Adidas Campus | </li>
-        <li onclick="showBrand('puma')"> Puma Suede xl</li>
-    </ul>
-
-
-
-   
-       <div id="adidas" class="brand-content">
-
-    <div class="shoe-card">
-        <img src="images/adidas campus grey.jpg" alt="">
-        <span class="price">P1,299</span>
-    </div>
-
-    <div class="shoe-card">
-        <img src="images/campus.jpg" alt="">
-        <span class="price">P1,299</span>
-    </div>
-
-    <div class="shoe-card">
-        <img src="images/campus red.jpg" alt="">
-        <span class="price">P1,299</span>
-    </div>
-
-</div>
-    
-
-    <div id="puma" class="brand-content">
-        <div class="shoe-card">
-           <img src="images/red xl.jpg" alt="">
-     <span class="price">P1,499</span>
-        </div>
-      
-       <div class="shoe-card">
-          <img src="images/Puma XL blue.jpg" alt="">
-     <span class="price">P1,499</span>
-        </div>
-       
-       
-       <div class="shoe-card">
-          <img src="images/pumaxl.jpg" alt="">
-     <span class="price">P1,499</span>
-        </div>
-    </div>
-
-    <div id="nike" class="brand-content">
-       <div class="shoe-card">
-          <img src="images/black dunk.jpg" alt="">
-     <span class="price">P1,599</span>
-        </div>
-
-       <div class="shoe-card">
-          <img src="images/blue dunk.jpg" alt=""> 
-     <span class="price">P1,599</span>
-        </div>
-       
-      
-        
-       <div class="shoe-card">
-         <img src="images/brown dunk.jpg" alt="">
-     <span class="price">P1,599</span>
-        </div>
-    </div>
-
-</section>
-
-
-
-
-
-
-
-/*ADD TO BAG CODE*/
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -544,12 +466,12 @@
 //  PRODUCTS DATA
 // ═══════════════════════════════════════════
 const PRODUCTS = [
-  { id:'air-glide',   name:'Air Glide Pro',  emoji:'<img src="brown dunk.jpg" alt="Shoe name" class="emoji">', price:139, oldPrice:179, size:'UK 8' },
-  { id:'trail-raven', name:'Trail Raven X',  emoji:'🥾', price:189, oldPrice:229, size:'UK 8' },
-  { id:'velvet-edge', name:'Velvet Edge',    emoji:'👠', price:89,  oldPrice:120, size:'UK 6' },
-  { id:'drift-slide', name:'Drift Slide',    emoji:'🩴', price:59,  oldPrice:79,  size:'UK 7' },
-  { id:'cloud-run',   name:'Cloud Run 2',    emoji:'🫧', price:219, oldPrice:259, size:'UK 8' },
-  { id:'urban-force', name:'Urban Force',    emoji:'👞', price:165, oldPrice:199, size:'UK 8' },
+  { id:'air-glide',   name:'Air Glide Pro',  images:'brown dunk.jpg', price:139, oldPrice:179, size:'UK 8' },
+  { id:'trail-raven', name:'Trail Raven X',  images:'black dunk.jpg', price:189, oldPrice:229, size:'UK 8' },
+  { id:'velvet-edge', name:'Velvet Edge',    images:'👠', price:89,  oldPrice:120, size:'UK 6' },
+  { id:'drift-slide', name:'Drift Slide',    images:'🩴', price:59,  oldPrice:79,  size:'UK 7' },
+  { id:'cloud-run',   name:'Cloud Run 2',    images:'🫧', price:219, oldPrice:259, size:'UK 8' },
+  { id:'urban-force', name:'Urban Force',    images:'👞', price:165, oldPrice:199, size:'UK 8' },
 ];
 
 const FREE_SHIPPING_THRESHOLD = 75;
@@ -565,8 +487,9 @@ function renderProducts() {
     const disc = Math.round((1 - p.price / p.oldPrice) * 100);
     const div = document.createElement('div');
     div.className = 'product-card';
-    div.innerHTML = `
-      <div class="product-img">${p.emoji}</div>
+    div.innerHTML = 
+      <div class="product-img"><img src="${p.images}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" /></div>`
+     
       <div class="product-body">
         <div class="product-name">${p.name}</div>
         <div class="product-price-row">
@@ -712,7 +635,7 @@ function renderCart() {
           ${item.selected ? '✓' : ''}
         </div>
       </div>
-      <div class="item-img-wrap">${item.emoji}</div>
+      <div class="item-img-wrap"><img src="${item.image}" alt="${item.name}" /></div>
       <div class="item-body">
         <div class="item-name">${item.name}</div>
         <div class="item-meta">${item.size}</div>
@@ -782,7 +705,7 @@ renderCart();
 
 
               
-</main>
+
          
           <footer>
            <p>&copy;2026 Vars Kicks</p>
