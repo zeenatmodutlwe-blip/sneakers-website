@@ -243,14 +243,15 @@ showBrand('adidas');
       opacity: 0.8;
     }
     .shoe-emoji {
-      font-size: 120px;
-      position: relative;
-      z-index: 1;
-      animation: floatShoe 4s ease-in-out infinite;
-      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.12));
-      user-select: none;
-    }
-
+  width: 100%;
+  max-width: 280px;
+  height: 220px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  animation: floatShoe 4s ease-in-out infinite;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.12));
+}
     .card-info {
       padding: 2.5rem 2rem 2.5rem 1.5rem;
       display: flex;
@@ -361,13 +362,7 @@ showBrand('adidas');
       .card-name { font-size: 22px; }
     }
 
-.shoe-image {
-    width: 250px;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    object-fit: contain;
-}
+
     
   </style>
 </head>
@@ -390,9 +385,7 @@ showBrand('adidas');
 
   <!-- Puma Suede xl -->
   <div class="sneaker-card active" id="air-glide" style="--glow:#dce8f5">
-    <div class="card-visual">
-    <img src="images/brown dunk.png" alt="Air Glide Sneaker" class="shoe-image">
-</div>
+   <div class="card-visual"><img class="shoe-emoji" src="images/brown dunk.jpg" alt="brown dunk" /></div>
      
    
     <div class="card-info">
