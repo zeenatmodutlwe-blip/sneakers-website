@@ -601,11 +601,1231 @@ showBrand('adidas');
 
 
 
+/*ADD TO BAG CODE*/
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f6f3;
+      --white: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: rgba(0,0,0,0.10);
+      --red: #e24b4a;
+      --green: #2a7d4f;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem;
+      height: 56px;
+      background: var(--white);
+      border-bottom: 0.5px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .top-bar-logo { font-size: 17px; font-weight: 700; letter-spacing: 0.1em; }
+    .top-bar-right { display: flex; align-items: center; gap: 16px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 22px; position: relative; line-height: 1;
+    }
+    .cart-badge {
+      position: absolute; top: -5px; right: -7px;
+      background: var(--red); color: #fff;
+      font-size: 9px; font-weight: 700;
+      min-width: 16px; height: 16px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 3px;
+      opacity: 0; transform: scale(0);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .cart-badge.show { opacity: 1; transform: scale(1); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #222; color: #fff;
+      padding: 10px 20px; border-radius: 30px;
+      font-size: 13px; font-weight: 500;
+      z-index: 999; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── CART OVERLAY ── */
+    .cart-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 300; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+    /* ── CART DRAWER ── */
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 420px; max-width: 100vw;
+      background: var(--white);
+      z-index: 400;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: -6px 0 40px rgba(0,0,0,0.14);
+    }
+    .cart-drawer.open { transform: translateX(0); }
+
+    /* Drawer header */
+    .drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem;
+      height: 54px;
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .drawer-head h2 { font-size: 15px; font-weight: 600; }
+    .drawer-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; color: var(--muted);
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .drawer-close:hover { background: var(--bg); color: var(--text); }
+
+    /* Free shipping bar */
+    .shipping-bar {
+      padding: 10px 1.25rem;
+      background: #fff8f0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 12px; color: #a05a00;
+      flex-shrink: 0;
+    }
+    .shipping-bar-track {
+      height: 4px; background: #f0dfc0; border-radius: 4px; margin-top: 6px; overflow: hidden;
+    }
+    .shipping-bar-fill {
+      height: 100%; background: #e8a020; border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Select all row */
+    .select-all-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 1.25rem;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .checkbox {
+      width: 18px; height: 18px; border-radius: 4px;
+      border: 1.5px solid #ccc; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .checkbox.checked { background: var(--text); border-color: var(--text); color: #fff; }
+
+    /* Items list */
+    .cart-items-list {
+      flex: 1; overflow-y: auto; padding: 0;
+    }
+    .cart-items-list::-webkit-scrollbar { width: 4px; }
+    .cart-items-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+    /* Empty state */
+    .cart-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px;
+      height: 100%; padding: 3rem; text-align: center;
+    }
+    .cart-empty-icon { font-size: 56px; }
+    .cart-empty p { font-size: 15px; font-weight: 500; color: var(--text); }
+    .cart-empty span { font-size: 13px; color: var(--muted); }
+    .cart-empty-btn {
+      margin-top: 8px; padding: 11px 28px;
+      background: var(--text); color: #fff;
+      border: none; border-radius: 30px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .cart-empty-btn:hover { opacity: 0.8; }
+
+    /* Cart item row */
+    .cart-item {
+      display: flex; gap: 12px;
+      padding: 14px 1.25rem;
+      border-bottom: 0.5px solid var(--border);
+      animation: fadeUp 0.3s ease both;
+      position: relative;
+    }
+    .item-check { padding-top: 2px; flex-shrink: 0; }
+    .item-img-wrap {
+      width: 80px; height: 80px; flex-shrink: 0;
+      background: var(--bg); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 46px; overflow: hidden;
+    }
+    .item-img-wrap img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+    .item-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .item-name { font-size: 14px; font-weight: 500; line-height: 1.3; }
+    .item-meta { font-size: 12px; color: var(--muted); }
+    .item-bottom {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-top: 6px;
+    }
+    .item-price { font-size: 15px; font-weight: 600; color: var(--red); }
+    .item-price .item-old {
+      font-size: 12px; color: var(--muted);
+      text-decoration: line-through; margin-right: 4px; font-weight: 400;
+    }
+
+    /* Qty stepper */
+    .qty-stepper {
+      display: flex; align-items: center; gap: 0;
+      border: 0.5px solid var(--border); border-radius: 6px; overflow: hidden;
+    }
+    .qty-step {
+      width: 28px; height: 28px;
+      background: none; border: none; cursor: pointer;
+      font-size: 16px; font-weight: 500; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .qty-step:hover { background: var(--bg); }
+    .qty-num {
+      width: 28px; text-align: center;
+      font-size: 13px; font-weight: 500;
+      border-left: 0.5px solid var(--border);
+      border-right: 0.5px solid var(--border);
+      line-height: 28px;
+    }
+
+    /* Item actions (delete / save) */
+    .item-actions {
+      display: flex; gap: 12px; margin-top: 8px;
+    }
+    .item-action-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 4px;
+      transition: color 0.2s;
+    }
+    .item-action-btn:hover { color: var(--text); }
+    .item-action-btn.del:hover { color: var(--red); }
+
+    /* Sale tag */
+    .sale-tag {
+      display: inline-block;
+      background: #fff0f0; color: var(--red);
+      font-size: 10px; font-weight: 600;
+      padding: 2px 6px; border-radius: 4px;
+      margin-top: 2px;
+    }
+
+    /* ── COUPON ROW ── */
+    .coupon-row {
+      padding: 12px 1.25rem;
+      border-top: 0.5px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .coupon-row:hover { background: var(--bg); }
+    .coupon-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+    .coupon-right { font-size: 13px; color: var(--muted); }
+
+    /* ── PRICE SUMMARY ── */
+    .price-summary {
+      padding: 14px 1.25rem;
+      border-top: 0.5px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+      flex-shrink: 0;
+    }
+    .price-row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--muted);
+    }
+    .price-row.saved { color: var(--green); font-weight: 500; }
+    .price-row.total {
+      font-size: 16px; font-weight: 700; color: var(--text);
+      border-top: 0.5px solid var(--border);
+      padding-top: 10px; margin-top: 2px;
+    }
+    .price-row.total .total-sub { font-size: 11px; font-weight: 400; color: var(--muted); }
+
+    /* ── CHECKOUT FOOTER ── */
+    .checkout-footer {
+      padding: 12px 1.25rem 20px;
+      border-top: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .checkout-btn {
+      width: 100%; padding: 15px;
+      background: var(--red); color: #fff;
+      border: none; border-radius: 30px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .checkout-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .checkout-btn:active { transform: scale(0.99); }
+    .checkout-total { font-size: 14px; font-weight: 700; }
+
+    /* ── DEMO SHOP ── */
+    .shop { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+    .shop h2 { font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+    .products {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;
+    }
+    .product-card {
+      background: var(--white); border-radius: var(--radius);
+      border: 0.5px solid var(--border); overflow: hidden;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .product-img {
+      width: 100%; height: 140px; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px;
+      transition: transform 0.4s;
+    }
+    .product-card:hover .product-img { transform: scale(1.05) rotate(-4deg); }
+    .product-body { padding: 12px; }
+    .product-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
+    .product-price-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .product-price { font-size: 14px; font-weight: 700; color: var(--red); }
+    .product-old { font-size: 12px; color: var(--muted); text-decoration: line-through; }
+    .product-discount { font-size: 11px; color: var(--red); font-weight: 600; }
+    .product-add {
+      width: 100%; margin-top: 10px; padding: 9px;
+      background: var(--text); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .product-add:hover { background: #333; }
+    .product-add:active { transform: scale(0.97); }
+    .product-add.done { background: var(--green); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .cart-drawer { width: 100vw; }
+      .products { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <span class="top-bar-logo">STRYDE</span>
+  <div class="top-bar-right">
+    <button class="icon-btn" onclick="openCart()" aria-label="Cart">
+      🛍️
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+
+  <!-- Header -->
+  <div class="drawer-head">
+    <h2>My Bag (<span id="drawerCount">0</span>)</h2>
+    <button class="drawer-close" onclick="closeCart()">✕</button>
+  </div>
+
+  <!-- Free shipping progress -->
+  <div class="shipping-bar" id="shippingBar">
+    <span id="shippingMsg">Add <strong id="shippingLeft">$75</strong> more for free shipping 🚚</span>
+    <div class="shipping-bar-track">
+      <div class="shipping-bar-fill" id="shippingFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Select all -->
+  <div class="select-all-row">
+    <div class="checkbox checked" id="selectAllBox" onclick="toggleSelectAll()">✓</div>
+    <span>All items</span>
+    <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="selectedCount"></span>
+  </div>
+
+  <!-- Items -->
+  <div class="cart-items-list" id="cartItemsList">
+    <div class="cart-empty" id="cartEmpty">
+      <div class="cart-empty-icon">🛍️</div>
+      <p>Your bag is empty</p>
+      <span>Add some sneakers to get started</span>
+      <button class="cart-empty-btn" onclick="closeCart()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Coupon -->
+  <div class="coupon-row" id="couponRow" style="display:none">
+    <div class="coupon-left">🏷️ Coupons &amp; Promo Codes</div>
+    <div class="coupon-right">Apply &rsaquo;</div>
+  </div>
+
+  <!-- Price summary -->
+  <div class="price-summary" id="priceSummary" style="display:none">
+    <div class="price-row"><span>Subtotal</span><span id="subtotalEl">$0.00</span></div>
+    <div class="price-row saved" id="savedRow" style="display:none">
+      <span>You saved</span><span id="savedEl">$0.00</span>
+    </div>
+    <div class="price-row"><span>Shipping</span><span id="shippingCostEl">$4.99</span></div>
+    <div class="price-row total">
+      <span>Total <span class="total-sub">(incl. taxes)</span></span>
+      <span id="totalEl">$0.00</span>
+    </div>
+  </div>
+
+  <!-- Checkout -->
+  <div class="checkout-footer" id="checkoutFooter" style="display:none">
+    <button class="checkout-btn" onclick="handleCheckout()">
+      <span>Checkout (<span id="checkoutCount">0</span> items)</span>
+      <span class="checkout-total" id="checkoutTotal">$0.00</span>
+    </button>
+  </div>
+
+</div>
+
+<!-- DEMO SHOP -->
+<div class="shop">
+  <h2>Featured drops</h2>
+  <div class="products" id="productsGrid"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  PRODUCTS DATA
+// ═══════════════════════════════════════════
+const PRODUCTS = [
+  { id:'air-glide',   name:'Air Glide Pro',  emoji:'👟', price:139, oldPrice:179, size:'UK 8' },
+  { id:'trail-raven', name:'Trail Raven X',  emoji:'🥾', price:189, oldPrice:229, size:'UK 8' },
+  { id:'velvet-edge', name:'Velvet Edge',    emoji:'👠', price:89,  oldPrice:120, size:'UK 6' },
+  { id:'drift-slide', name:'Drift Slide',    emoji:'🩴', price:59,  oldPrice:79,  size:'UK 7' },
+  { id:'cloud-run',   name:'Cloud Run 2',    emoji:'🫧', price:219, oldPrice:259, size:'UK 8' },
+  { id:'urban-force', name:'Urban Force',    emoji:'👞', price:165, oldPrice:199, size:'UK 8' },
+];
+
+const FREE_SHIPPING_THRESHOLD = 75;
+let cart = {}; // { id: { ...product, qty, selected } }
+
+// ═══════════════════════════════════════════
+//  RENDER PRODUCT GRID
+// ═══════════════════════════════════════════
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML = '';
+  PRODUCTS.forEach(p => {
+    const disc = Math.round((1 - p.price / p.oldPrice) * 100);
+    const div = document.createElement('div');
+    div.className = 'product-card';
+    div.innerHTML = `
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price-row">
+          <span class="product-price">$${p.price}</span>
+          <span class="product-old">$${p.oldPrice}</span>
+          <span class="product-discount">-${disc}%</span>
+        </div>
+        <button class="product-add" id="btn-${p.id}" onclick="addToCart('${p.id}', this)">
+          + Add to bag
+        </button>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  CART LOGIC
+// ═══════════════════════════════════════════
+function addToCart(id, btn) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+
+  if (cart[id]) {
+    cart[id].qty++;
+  } else {
+    cart[id] = { ...p, qty: 1, selected: true };
+  }
+
+  renderCart();
+  showToast(`✓ ${p.name} added to bag`);
+
+  btn.classList.add('done');
+  btn.textContent = '✓ Added!';
+  setTimeout(() => {
+    btn.classList.remove('done');
+    btn.textContent = '+ Add to bag';
+  }, 1500);
+
+  // Open cart briefly to show item
+  openCart();
+}
+
+function removeItem(id) {
+  delete cart[id];
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) { removeItem(id); return; }
+  renderCart();
+}
+
+function toggleItem(id) {
+  if (cart[id]) cart[id].selected = !cart[id].selected;
+  renderCart();
+}
+
+function toggleSelectAll() {
+  const items = Object.values(cart);
+  const allSelected = items.every(i => i.selected);
+  items.forEach(i => i.selected = !allSelected);
+  renderCart();
+}
+
+// ═══════════════════════════════════════════
+//  RENDER CART
+// ═══════════════════════════════════════════
+function renderCart() {
+  const items = Object.values(cart);
+  const selected = items.filter(i => i.selected);
+
+  const totalQty    = items.reduce((s, i) => s + i.qty, 0);
+  const selectedQty = selected.reduce((s, i) => s + i.qty, 0);
+  const subtotal    = selected.reduce((s, i) => s + i.price * i.qty, 0);
+  const fullPrice   = selected.reduce((s, i) => s + i.oldPrice * i.qty, 0);
+  const saved       = fullPrice - subtotal;
+  const shipping    = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 4.99;
+  const total       = subtotal + shipping;
+
+  // Badge
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = totalQty;
+  badge.classList.toggle('show', totalQty > 0);
+
+  // Drawer count
+  document.getElementById('drawerCount').textContent = totalQty;
+
+  // Shipping bar
+  const pct = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+  document.getElementById('shippingFill').style.width = pct + '%';
+  if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+    document.getElementById('shippingMsg').innerHTML = '🎉 You\'ve unlocked <strong>free shipping!</strong>';
+  } else {
+    const left = (FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2);
+    document.getElementById('shippingMsg').innerHTML =
+      `Add <strong>$${left}</strong> more for free shipping 🚚`;
+  }
+
+  // Select all checkbox
+  const allSelected = items.length > 0 && items.every(i => i.selected);
+  document.getElementById('selectAllBox').classList.toggle('checked', allSelected);
+  document.getElementById('selectAllBox').textContent = allSelected ? '✓' : '';
+  document.getElementById('selectedCount').textContent =
+    selected.length > 0 ? `${selectedQty} selected` : '';
+
+  // Show/hide sections
+  const hasItems = items.length > 0;
+  document.getElementById('cartEmpty').style.display   = hasItems ? 'none' : 'flex';
+  document.getElementById('couponRow').style.display   = hasItems ? 'flex' : 'none';
+  document.getElementById('priceSummary').style.display  = hasItems ? 'flex' : 'none';
+  document.getElementById('checkoutFooter').style.display = hasItems ? 'block' : 'none';
+
+  // Price summary
+  document.getElementById('subtotalEl').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('shippingCostEl').textContent = shipping === 0 ? 'FREE 🎉' : '$' + shipping.toFixed(2);
+  document.getElementById('totalEl').textContent = '$' + total.toFixed(2);
+
+  const savedRow = document.getElementById('savedRow');
+  savedRow.style.display = saved > 0 ? 'flex' : 'none';
+  document.getElementById('savedEl').textContent = '-$' + saved.toFixed(2);
+
+  // Checkout button
+  document.getElementById('checkoutCount').textContent = selectedQty;
+  document.getElementById('checkoutTotal').textContent = '$' + total.toFixed(2);
+
+  // Render item rows
+  const list = document.getElementById('cartItemsList');
+  // Remove old item rows (keep cart-empty)
+  [...list.children].forEach(c => { if (!c.id || c.id !== 'cartEmpty') c.remove(); });
+
+  items.forEach(item => {
+    const disc = Math.round((1 - item.price / item.oldPrice) * 100);
+    const el = document.createElement('div');
+    el.className = 'cart-item';
+    el.id = 'cart-item-' + item.id;
+    el.innerHTML = `
+      <div class="item-check">
+        <div class="checkbox ${item.selected ? 'checked' : ''}"
+             onclick="toggleItem('${item.id}')">
+          ${item.selected ? '✓' : ''}
+        </div>
+      </div>
+      <div class="item-img-wrap">${item.emoji}</div>
+      <div class="item-body">
+        <div class="item-name">${item.name}</div>
+        <div class="item-meta">${item.size}</div>
+        <div class="sale-tag">-${disc}% OFF</div>
+        <div class="item-bottom">
+          <div class="item-price">
+            <span class="item-old">$${item.oldPrice}</span>
+            $${item.price}
+          </div>
+          <div class="qty-stepper">
+            <button class="qty-step" onclick="changeQty('${item.id}', -1)">−</button>
+            <div class="qty-num">${item.qty}</div>
+            <button class="qty-step" onclick="changeQty('${item.id}', 1)">+</button>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="item-action-btn del" onclick="removeItem('${item.id}')">🗑 Remove</button>
+          <button class="item-action-btn" onclick="showToast('Saved to wishlist ❤️')">❤️ Save</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  DRAWER OPEN / CLOSE
+// ═══════════════════════════════════════════
+function openCart() {
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+}
+function closeCart() {
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════
+//  CHECKOUT
+// ═══════════════════════════════════════════
+function handleCheckout() {
+  const selected = Object.values(cart).filter(i => i.selected);
+  if (selected.length === 0) { showToast('Please select items to checkout'); return; }
+  showToast('Redirecting to checkout... 🚀');
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+renderProducts();
+renderCart();
+</script>
 
 
 
 
 
+
+
+
+
+
+
+/*SLIDESHOW CODE*/
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shoe Slideshow</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f6f3;
+      --white: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* ── SLIDESHOW WRAPPER ── */
+    .slideshow-wrapper {
+      width: 100%;
+      max-width: 520px;
+      background: var(--white);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    }
+
+    /* ── MAIN IMAGE AREA ── */
+    .main-slide-area {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: var(--bg);
+      overflow: hidden;
+      cursor: grab;
+    }
+    .main-slide-area:active { cursor: grabbing; }
+
+    /* Glow background that changes per slide */
+    .slide-glow {
+      position: absolute; inset: 0;
+      transition: background 0.6s ease;
+      pointer-events: none;
+    }
+
+    /* Each slide */
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    .slide.exit-left {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* The shoe image / emoji inside each slide */
+    .slide-img {
+      font-size: 140px;
+      filter: drop-shadow(0 24px 32px rgba(0,0,0,0.14));
+      animation: floatImg 4s ease-in-out infinite;
+      user-select: none;
+      transition: transform 0.3s ease;
+    }
+    .slide-img:hover { transform: scale(1.06) rotate(-5deg); }
+    /* If using real images: */
+    .slide-img img {
+      width: 300px; height: 300px;
+      object-fit: contain;
+      filter: drop-shadow(0 24px 32px rgba(0,0,0,0.14));
+      animation: floatImg 4s ease-in-out infinite;
+    }
+
+    /* Slide label (e.g. "2 / 5") */
+    .slide-counter {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: rgba(0,0,0,0.18);
+      color: #fff;
+      font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: 20px;
+      backdrop-filter: blur(6px);
+      letter-spacing: 0.05em;
+    }
+
+    /* Badge on slide (e.g. NEW, SALE) */
+    .slide-badge {
+      position: absolute;
+      top: 14px; left: 16px;
+      font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .badge-new  { background: #E6F1FB; color: #0C447C; }
+    .badge-sale { background: #fff0f0; color: #e24b4a; }
+    .badge-hot  { background: #FAECE7; color: #993C1D; }
+    .badge-ltd  { background: #F3ECF9; color: #6B3A9E; }
+
+    /* ── PREV / NEXT ARROWS ── */
+    .arrow {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.88);
+      border: 0.5px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; z-index: 10;
+      backdrop-filter: blur(6px);
+      transition: background 0.2s, transform 0.2s, opacity 0.2s;
+      opacity: 0;
+    }
+    .main-slide-area:hover .arrow { opacity: 1; }
+    .arrow:hover { background: var(--text); color: #fff; transform: translateY(-50%) scale(1.08); }
+    .arrow.prev { left: 12px; }
+    .arrow.next { right: 12px; }
+
+    /* ── AUTOPLAY PROGRESS BAR ── */
+    .progress-bar {
+      height: 3px;
+      background: rgba(0,0,0,0.08);
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--text);
+      width: 0%;
+      transition: width linear;
+    }
+
+    /* ── INFO SECTION ── */
+    .slide-info {
+      padding: 1.25rem 1.5rem 0.5rem;
+      min-height: 56px;
+    }
+    .slide-name {
+      font-size: 18px; font-weight: 600;
+      transition: opacity 0.3s;
+    }
+    .slide-desc {
+      font-size: 13px; color: var(--muted);
+      margin-top: 3px;
+      transition: opacity 0.3s;
+    }
+    .slide-price-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 6px;
+    }
+    .slide-price { font-size: 20px; font-weight: 700; color: #e24b4a; }
+    .slide-old   { font-size: 13px; color: var(--muted); text-decoration: line-through; }
+    .slide-disc  { font-size: 12px; font-weight: 600; color: #e24b4a; }
+
+    /* ── THUMBNAIL STRIP ── */
+    .thumb-strip {
+      display: flex; gap: 8px; align-items: center;
+      padding: 0.75rem 1.5rem 1rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .thumb-strip::-webkit-scrollbar { display: none; }
+
+    .thumb {
+      width: 58px; height: 58px; flex-shrink: 0;
+      background: var(--bg);
+      border-radius: 10px;
+      border: 2px solid transparent;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, opacity 0.2s;
+      opacity: 0.55;
+      overflow: hidden;
+    }
+    .thumb img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+    .thumb:hover { opacity: 0.85; transform: scale(1.05); }
+    .thumb.active {
+      border-color: var(--text);
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    /* ── DOT INDICATORS ── */
+    .dot-row {
+      display: flex; justify-content: center; gap: 6px;
+      padding-bottom: 1.25rem;
+    }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, width 0.3s;
+    }
+    .dot.active {
+      background: var(--text);
+      width: 20px;
+      border-radius: 4px;
+    }
+
+    /* ── PLAY/PAUSE BUTTON ── */
+    .controls-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem 1rem;
+    }
+    .play-btn {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: 30px; padding: 6px 14px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .play-btn:hover { background: #e8e6e2; }
+    .speed-btn {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: 30px; padding: 6px 14px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .speed-btn:hover { background: #e8e6e2; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes floatImg {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-14px); }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 0; align-items: flex-start; }
+      .slideshow-wrapper { border-radius: 0; box-shadow: none; max-width: 100%; }
+      .main-slide-area { height: 300px; }
+      .slide-img { font-size: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="slideshow-wrapper">
+
+  <!-- MAIN SLIDE AREA -->
+  <div class="main-slide-area" id="mainArea"
+       onmousedown="dragStart(event)" ontouchstart="touchStart(event)">
+
+    <!-- Glow background -->
+    <div class="slide-glow" id="slideGlow"></div>
+
+    <!--
+      ════════════════════════════════════════
+      YOUR SLIDES GO HERE
+      To use real images, replace the emoji span with:
+        <img src="your-shoe.png" alt="Shoe name" class="slide-img" />
+      ════════════════════════════════════════
+    -->
+    <div class="slide active" data-glow="#dce8f5">
+      <img src="images/black dunk.jpg" alt="Shoe name" class="slide-img">
+    </div>
+    <div class="slide" data-glow="#d8e8cc">
+     <img src="images/brown dunk.jpg" alt="Shoe name" class="slide-img" />
+    </div>
+    <div class="slide" data-glow="#f5dce8">
+      <span class="slide-img">👠</span>
+    </div>
+    <div class="slide" data-glow="#cceee2">
+      <span class="slide-img">🩴</span>
+    </div>
+    <div class="slide" data-glow="#e8e0f5">
+      <span class="slide-img">🫧</span>
+    </div>
+
+    <!-- Slide badge -->
+    <div class="slide-badge badge-new" id="slideBadge">New</div>
+
+    <!-- Counter -->
+    <div class="slide-counter" id="slideCounter">1 / 5</div>
+
+    <!-- Arrows -->
+    <button class="arrow prev" onclick="prev()">‹</button>
+    <button class="arrow next" onclick="next()">›</button>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <!-- SLIDE INFO -->
+  <div class="slide-info">
+    <div class="slide-name" id="slideName">Air Glide Pro</div>
+    <div class="slide-desc" id="slideDesc">Ultra-lightweight knit upper with responsive foam sole</div>
+    <div class="slide-price-row">
+      <span class="slide-price" id="slidePrice">$139</span>
+      <span class="slide-old"  id="slideOld">$179</span>
+      <span class="slide-disc" id="slideDisc">-22%</span>
+    </div>
+  </div>
+
+  <!-- THUMBNAIL STRIP -->
+  <div class="thumb-strip" id="thumbStrip"></div>
+
+  <!-- CONTROLS -->
+  <div class="controls-row">
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">⏸ Pause</button>
+    <button class="speed-btn" id="speedBtn" onclick="cycleSpeed()">Speed: 3s</button>
+  </div>
+
+  <!-- DOTS -->
+  <div class="dot-row" id="dotRow"></div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  SLIDE DATA
+//  Add / edit your slides here
+// ═══════════════════════════════════════════
+const SLIDES = [
+  {
+    emoji: '👟',
+    name:  'Air Glide Pro',
+    desc:  'Ultra-lightweight knit upper with responsive foam sole',
+    price: '$139', old: '$179', disc: '-22%',
+    badge: 'New', badgeClass: 'badge-new',
+    glow:  '#dce8f5',
+  },
+  {
+    emoji: '🥾',
+    name:  'Trail Raven X',
+    desc:  'Waterproof membrane with aggressive grip outsole',
+    price: '$189', old: '$229', disc: '-17%',
+    badge: 'Hot', badgeClass: 'badge-hot',
+    glow:  '#d8e8cc',
+  },
+  {
+    emoji: '👠',
+    name:  'Velvet Edge',
+    desc:  'Suede upper with contrast sole — lifestyle perfected',
+    price: '$89',  old: '$120', disc: '-26%',
+    badge: 'Sale', badgeClass: 'badge-sale',
+    glow:  '#f5dce8',
+  },
+  {
+    emoji: '🩴',
+    name:  'Drift Slide',
+    desc:  'Cloud-soft EVA footbed with adjustable strap',
+    price: '$59',  old: '$79',  disc: '-25%',
+    badge: 'New',  badgeClass: 'badge-new',
+    glow:  '#cceee2',
+  },
+  {
+    emoji: '🫧',
+    name:  'Cloud Run 2',
+    desc:  'Dual-layer foam stack for maximum road cushioning',
+    price: '$219', old: '$259', disc: '-15%',
+    badge: 'Ltd',  badgeClass: 'badge-ltd',
+    glow:  '#e8e0f5',
+  },
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let current   = 0;
+let isPlaying = true;
+let delay     = 3000;
+let timer     = null;
+let dragStartX = null;
+
+const speeds = [2000, 3000, 5000];
+const speedLabels = ['2s', '3s', '5s'];
+let speedIdx = 1;
+
+// ═══════════════════════════════════════════
+//  BUILD THUMBNAILS & DOTS
+// ═══════════════════════════════════════════
+function buildUI() {
+  const thumbStrip = document.getElementById('thumbStrip');
+  const dotRow     = document.getElementById('dotRow');
+
+  SLIDES.forEach((s, i) => {
+    // Thumbnail
+    const t = document.createElement('div');
+    t.className = 'thumb' + (i === 0 ? ' active' : '');
+    t.textContent = s.emoji;
+    t.onclick = () => goTo(i);
+    thumbStrip.appendChild(t);
+
+    // Dot
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotRow.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  GO TO SLIDE
+// ═══════════════════════════════════════════
+function goTo(idx, direction) {
+  const slides = document.querySelectorAll('.slide');
+  const thumbs = document.querySelectorAll('.thumb');
+  const dots   = document.querySelectorAll('.dot');
+
+  // Exit current
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit-left');
+  setTimeout(() => slides[current] && slides[current].classList.remove('exit-left'), 500);
+
+  current = (idx + SLIDES.length) % SLIDES.length;
+
+  // Enter new
+  slides[current].classList.add('active');
+
+  // Update thumbnails & dots
+  thumbs.forEach((t, i) => t.classList.toggle('active', i === current));
+  dots.forEach((d, i)   => d.classList.toggle('active', i === current));
+
+  // Scroll active thumb into view
+  thumbs[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+  // Update info
+  const s = SLIDES[current];
+  document.getElementById('slideName').textContent  = s.name;
+  document.getElementById('slideDesc').textContent  = s.desc;
+  document.getElementById('slidePrice').textContent = s.price;
+  document.getElementById('slideOld').textContent   = s.old;
+  document.getElementById('slideDisc').textContent  = s.disc;
+  document.getElementById('slideCounter').textContent = `${current + 1} / ${SLIDES.length}`;
+
+  const badge = document.getElementById('slideBadge');
+  badge.textContent = s.badge;
+  badge.className = 'slide-badge ' + s.badgeClass;
+
+  // Glow
+  document.getElementById('slideGlow').style.background =
+    `radial-gradient(circle at 55% 40%, ${s.glow} 0%, transparent 70%)`;
+
+  // Reset progress bar
+  restartProgress();
+}
+
+function next() { goTo(current + 1); }
+function prev() { goTo(current - 1); }
+
+// ═══════════════════════════════════════════
+//  AUTOPLAY
+// ═══════════════════════════════════════════
+function startAutoplay() {
+  clearTimeout(timer);
+  if (!isPlaying) return;
+  timer = setTimeout(() => { next(); }, delay);
+}
+
+function restartProgress() {
+  const fill = document.getElementById('progressFill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${delay}ms linear`;
+    fill.style.width = '100%';
+  });
+  startAutoplay();
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('playBtn');
+  btn.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+  if (isPlaying) {
+    restartProgress();
+  } else {
+    clearTimeout(timer);
+    const fill = document.getElementById('progressFill');
+    // Freeze progress bar at current position
+    const computed = getComputedStyle(fill).width;
+    const pct = (parseFloat(computed) / fill.parentElement.offsetWidth * 100).toFixed(1);
+    fill.style.transition = 'none';
+    fill.style.width = pct + '%';
+  }
+}
+
+function cycleSpeed() {
+  speedIdx = (speedIdx + 1) % speeds.length;
+  delay = speeds[speedIdx];
+  document.getElementById('speedBtn').textContent = `Speed: ${speedLabels[speedIdx]}`;
+  restartProgress();
+}
+
+// ═══════════════════════════════════════════
+//  SWIPE / DRAG TO NAVIGATE
+// ═══════════════════════════════════════════
+function dragStart(e) {
+  dragStartX = e.clientX;
+  document.addEventListener('mouseup', dragEnd);
+}
+function touchStart(e) {
+  dragStartX = e.touches[0].clientX;
+  document.addEventListener('touchend', touchEnd);
+}
+function dragEnd(e) {
+  if (dragStartX === null) return;
+  const diff = dragStartX - e.clientX;
+  if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
+  dragStartX = null;
+  document.removeEventListener('mouseup', dragEnd);
+}
+function touchEnd(e) {
+  if (dragStartX === null) return;
+  const diff = dragStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
+  dragStartX = null;
+  document.removeEventListener('touchend', touchEnd);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') next();
+  if (e.key === 'ArrowLeft')  prev();
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+buildUI();
+// Set initial glow
+document.getElementById('slideGlow').style.background =
+  `radial-gradient(circle at 55% 40%, ${SLIDES[0].glow} 0%, transparent 70%)`;
+restartProgress();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+  
 
 
 
