@@ -466,12 +466,12 @@
 //  PRODUCTS DATA
 // ═══════════════════════════════════════════
 const PRODUCTS = [
-  { id:'air-glide',   name:'Air Glide Pro',  images:'brown dunk.jpg', price:139, oldPrice:179, size:'UK 8' },
-  { id:'trail-raven', name:'Trail Raven X',  images:'black dunk.jpg', price:189, oldPrice:229, size:'UK 8' },
-  { id:'velvet-edge', name:'Velvet Edge',    images:'👠', price:89,  oldPrice:120, size:'UK 6' },
-  { id:'drift-slide', name:'Drift Slide',    images:'🩴', price:59,  oldPrice:79,  size:'UK 7' },
-  { id:'cloud-run',   name:'Cloud Run 2',    images:'🫧', price:219, oldPrice:259, size:'UK 8' },
-  { id:'urban-force', name:'Urban Force',    images:'👞', price:165, oldPrice:199, size:'UK 8' },
+  { id:'air-glide',   name:'Air Glide Pro',  image:'images/brown-dunk.jpg', price:139, oldPrice:179, size:'UK 8' },
+  { id:'trail-raven', name:'Trail Raven X',  image:'images/black-dunk.jpg', price:189, oldPrice:229, size:'UK 8' },
+  { id:'velvet-edge', name:'Velvet Edge',    image:'👠', price:89,  oldPrice:120, size:'UK 6' },
+  { id:'drift-slide', name:'Drift Slide',    image:'🩴', price:59,  oldPrice:79,  size:'UK 7' },
+  { id:'cloud-run',   name:'Cloud Run 2',    image:'🫧', price:219, oldPrice:259, size:'UK 8' },
+  { id:'urban-force', name:'Urban Force',    image:'👞', price:165, oldPrice:199, size:'UK 8' },
 ];
 
 const FREE_SHIPPING_THRESHOLD = 75;
@@ -488,7 +488,7 @@ function renderProducts() {
     const div = document.createElement('div');
     div.className = 'product-card';
     div.innerHTML = 
-      <div class="product-img"><img src="${p.images}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" /></div>`
+      <div class="product-img"><img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" /></div>`
      
       <div class="product-body">
         <div class="product-name">${p.name}</div>
